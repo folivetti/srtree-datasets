@@ -21,6 +21,13 @@ description:         Please see the README on GitHub at <https://github.com/gith
 
 dependencies:
 - base >= 4.7 && < 5
+- bytestring >= 0.11 && < 0.12
+- vector
+- containers
+- hmatrix
+- filepath
+- split
+- zlib
 
 ghc-options:
 - -Wall

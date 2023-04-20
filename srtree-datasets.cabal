@@ -25,7 +25,7 @@ source-repository head
 
 library
   exposed-modules:
-      Lib
+      Data.SRTree.Datasets
   other-modules:
       Paths_srtree_datasets
   hs-source-dirs:
@@ -33,6 +33,13 @@ library
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       base >=4.7 && <5
+    , bytestring ==0.11.*
+    , containers
+    , filepath
+    , hmatrix
+    , split
+    , vector
+    , zlib
   default-language: Haskell2010
 
 executable srtree-datasets-exe
@@ -44,7 +51,14 @@ executable srtree-datasets-exe
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , bytestring ==0.11.*
+    , containers
+    , filepath
+    , hmatrix
+    , split
     , srtree-datasets
+    , vector
+    , zlib
   default-language: Haskell2010
 
 test-suite srtree-datasets-test
@@ -57,5 +71,12 @@ test-suite srtree-datasets-test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , bytestring ==0.11.*
+    , containers
+    , filepath
+    , hmatrix
+    , split
     , srtree-datasets
+    , vector
+    , zlib
   default-language: Haskell2010
