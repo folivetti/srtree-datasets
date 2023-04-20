@@ -5,14 +5,14 @@ module Data.SRTree.Datasets (loadDataset)
 
 import Data.ByteString.Char8 qualified as B
 import Data.ByteString.Lazy qualified as BS
-import Data.List (intercalate, delete)
+import Data.List (intercalate, delete, find)
 import Data.Vector qualified as V
 import Numeric.LinearAlgebra qualified as LA
 import Numeric.LinearAlgebra ((??), (¿), Extractor(..))
 import Codec.Compression.GZip ( decompress )
 import System.FilePath (takeExtension)
 import Text.Read (readMaybe)
-import Data.Map.Strict qualified as M
+import Data.Maybe (fromJust)
 
 type Columns = V.Vector Column
 type Column  = LA.Vector Double
@@ -63,14 +63,14 @@ parseVal xs = case readMaybe xs of
                 Just x  -> Right x
 {-# inline parseVal #-}
 
-getColumns :: M.Map B.ByteString Int -> B.ByteString -> B.ByteString -> ([Int], Int)
+getColumns :: [(B.ByteString, Int)] -> B.ByteString -> B.ByteString -> ([Int], Int)
 getColumns headerMap target columns = (ixs, iy)
   where
       n_cols = length headerMap
       getIx c = case parseVal c of
-                  Left name -> case headerMap M.!? B.pack name of
+                  Left name -> case find ((== B.pack name) . fst) headerMap of
                                  Nothing -> error $ "column name " <> name <> " does not exist."
-                                 Just v  -> v
+                                 Just v  -> snd v
                   Right v   -> if v >= 0 && v < n_cols
                                  then v
                                  else error $ "column index " <> show v <> " out of range."
@@ -78,7 +78,7 @@ getColumns headerMap target columns = (ixs, iy)
                then delete iy [0 .. n_cols - 1]
                else map (getIx . B.unpack) $ B.split ',' columns
       iy = if B.null target
-              then (n_cols - 1)
+              then n_cols - 1
               else getIx $ B.unpack target
 {-# inline getColumns #-}
 
@@ -104,7 +104,7 @@ getRows (B.unpack -> start) (B.unpack -> end) nRows
                                     else x
 {-# inline getRows #-}
 
-loadDataset :: FilePath -> Bool -> IO ((Columns, Column, Columns, Column), M.Map B.ByteString Int)
+loadDataset :: FilePath -> Bool -> IO ((Columns, Column, Columns, Column), String)
 loadDataset filename hasHeader = do
   let
     (fname, params) = splitFileNameParams filename
@@ -115,7 +115,7 @@ loadDataset filename hasHeader = do
     (header, content) = if hasHeader
                            then (head csv, tail csv)
                            else ([B.pack ('x' : show i) | i <- [0 .. ncols]], csv)
-    headerMap = M.fromList $ zip header [0 ..]
+    headerMap = zip header [0 ..]
     (ixs, iy) = getColumns headerMap (params !! 2) (params !! 3)
     (rows_train, rows_val) = getRows (params !! 0) (params !! 1) nrows
     datum = loadMtx content
@@ -127,5 +127,6 @@ loadDataset filename hasHeader = do
     y_val = y ?? (rows_val, All)
     toColumns = V.fromList . LA.toColumns
     toColumn  = head . LA.toColumns
+    varnames  = intercalate "," [B.unpack v | c <- ixs, let v = fst . fromJust $ find ((==c).snd) headerMap]
 
-  pure ((toColumns x_train, toColumn y_train, toColumns x_val, toColumn y_val ) , headerMap)
+  pure ((toColumns x_train, toColumn y_train, toColumns x_val, toColumn y_val ) , varnames)
