@@ -13,3 +13,4 @@ main = do
     print $ size $ V.head xv
     print x
     print y
+    print hm
