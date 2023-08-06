@@ -130,7 +130,7 @@ getRows :: B.ByteString -> B.ByteString -> Int -> (Extractor, Extractor)
 getRows (B.unpack -> start) (B.unpack -> end) nRows
   | st_ix >= end_ix                 = error $ "Invalid range: " <> show start <> ":" <> show end <> "."
   | st_ix == 0 && end_ix == nRows-1 = (All, All)
-  | otherwise                       = (Range st_ix 1 end_ix, Pos (idxs[ix | ix <- [0 .. nRows-1], ix < st_ix || ix > end_ix]))
+  | otherwise                       = (Range st_ix 1 end_ix, Range end_ix 1 (nRows-1))-- Pos (idxs[ix | ix <- [0 .. nRows-1], ix < st_ix || ix > end_ix]))
   where
       st_ix = if null start
                 then 0
