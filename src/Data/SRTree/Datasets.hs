@@ -99,7 +99,7 @@ parseVal xs = case readMaybe xs of
 
 -- | Given a map between column name and indeces,
 -- the target column and the variables columns,
--- returns the indeces of the variables columns and the target
+-- returns the indices of the variables columns and the target
 getColumns :: [(B.ByteString, Int)] -> B.ByteString -> B.ByteString -> ([Int], Int)
 getColumns headerMap target columns = (ixs, iy)
   where
@@ -173,7 +173,7 @@ processData csv params hasHeader = ((toColumns x_train, toColumn y_train, toColu
     ncols             = length $ head csv
     nrows             = length csv - fromEnum hasHeader
     (header, content) = if hasHeader
-                           then (zip (head csv) [0..], tail csv)
+                           then (zip (map B.strip $ head csv) [0..], tail csv)
                            else (map (\i -> (B.pack ('x' : show i), i)) [0 .. ncols], csv)
     varnames          = intercalate "," [B.unpack v | c <- ixs
                                         , let v = fst . fromJust $ find ((==c).snd) header
